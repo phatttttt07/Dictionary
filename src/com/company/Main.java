@@ -14,17 +14,14 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import com.company.HashData.*;
-import static java.util.Arrays.asList;
 
 public class Main {
     public static Map<String, String> AVdata = new HashMap<String, String>();
     public static Map<String, String> VAdata = new HashMap<String, String>();
-    public static Map<String, HashData> historyData = new HashMap<String, HashData>();
+    public static ArrayList<String> historyData = new ArrayList<>();
     public static String AnhViet = "Anh_Viet.xml";
     public static String VietAnh = "Viet_Anh.xml";
     public static String AnhVietNew = AnhViet;
@@ -32,7 +29,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
         // write your code here
-
+        readHistoryLog ((ArrayList<String>) historyData);
         while (true) {
             System.out.println("DICTIONARY");
             System.out.println("1.Eng-Vie");
@@ -41,7 +38,6 @@ public class Main {
             System.out.println("4.Exit"+ "\n");
             System.out.println("Your Option:");
             Scanner scanner = new Scanner(System.in);
-            readHistoryLog((HashMap<String, HashData>) historyData);
             int result = scanner.nextInt();
             switch(result)
             {
@@ -72,10 +68,10 @@ public class Main {
                                 String keyWord = scanner2.nextLine();
                                 System.out.println(findWord(keyWord.toLowerCase(), (HashMap<String, String>) AVdata));
                                 System.out.println("Press s to save this word to favorite or any other key to continue");
+                                writeHistoryData(keyWord, (ArrayList<String>) historyData);
                                 Scanner save = new Scanner(System.in);
                                 String event = save.nextLine();
                                 saved(event, keyWord);
-                                writeHistoryData(keyWord, (HashMap<String, HashData>) historyData);
                                 break;
                             }
                             case(2):
@@ -128,7 +124,7 @@ public class Main {
                             }
                             case(5):
                             {
-                                writeHistoryLog((HashMap<String, HashData>) historyData);
+                                writeHistoryLog((ArrayList<String>) historyData);
                                 System.exit(0);
                             }
                             default:{
@@ -167,7 +163,7 @@ public class Main {
                                 Scanner save = new Scanner(System.in);
                                 String event = save.nextLine();
                                 saved(event, keyWord);
-                                writeHistoryData(keyWord, (HashMap<String, HashData>) historyData);
+                                writeHistoryData(keyWord, (ArrayList<String>) historyData);
                                 break;
                             }
                             case(2):
@@ -202,7 +198,7 @@ public class Main {
                             }
                             case(5):
                             {
-                                writeHistoryLog((HashMap<String, HashData>) historyData);
+                                writeHistoryLog((ArrayList<String>) historyData);
                                 System.exit(0);
                             }
                             default:{
@@ -213,12 +209,12 @@ public class Main {
                 }
                 case(3):
                 {
-                    printHistory((HashMap<String, HashData>) historyData);
+                    printHistory((ArrayList<String>) historyData);
                     break;
                 }
                 case(4):
                 {
-                    writeHistoryLog((HashMap<String, HashData>) historyData);
+                    writeHistoryLog((ArrayList<String>) historyData);
                     System.exit(0);
                 }
                 default:{
@@ -344,7 +340,7 @@ public class Main {
            }
            return true;
    }
-   public static void readHistoryLog(HashMap<String, HashData> historyData) throws ParserConfigurationException, IOException, SAXException {
+   public static void readHistoryLog(ArrayList<String> historyData) throws ParserConfigurationException, IOException, SAXException {
        File file = new File("history.xml");
        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
@@ -359,14 +355,13 @@ public class Main {
                String key = keyValueElemet.getElementsByTagName("key").item(0).getTextContent();
                String date = keyValueElemet.getElementsByTagName("date").item(0).getTextContent();
                String times = keyValueElemet.getElementsByTagName("times").item(0).getTextContent();
-               HashData<Date, String> value = new HashData<Date, String>();
-               value.put(date, times);
-               historyData.put(key, value);
-               System.out.println(historyData.get(0));
+               historyData.add(key);
+               historyData.add(date);
+               historyData.add(times);
            }
        }
    }
-   public static void writeHistoryLog(HashMap<String, HashData> historyData)
+   public static void writeHistoryLog(ArrayList<String> historyData)
    {
        try {
 
@@ -375,17 +370,15 @@ public class Main {
            Element root = dom.createElement("root");
 
            dom.appendChild(root);
-           for (Map.Entry<String, HashData> keyValue : historyData.entrySet())
+           for (String keyValue : historyData)
            {
                Element log = dom.createElement("log");
                Element key = dom.createElement("key");
-               key.setTextContent((String) keyValue.getKey());
+               key.setTextContent(keyValue);
                Element date = dom.createElement("date");
                Element times = dom.createElement("times");
-               HashData<String, String> value = new HashData<String, String>();
-               value = keyValue.getValue();
-               date.setTextContent(value.getDate());
-               times.setTextContent(value.getTimes());
+               date.setTextContent(keyValue);
+               times.setTextContent(keyValue);
                log.appendChild(key);
                log.appendChild(date);
                log.appendChild(times);
@@ -398,21 +391,55 @@ public class Main {
        } catch (Exception ex) {
        }
    }
-   public static void writeHistoryData(String key, HashMap<String, HashData> historyData)
+   public static void writeHistoryData(String key, ArrayList<String> historyData)
    {
        Date date = Calendar.getInstance().getTime();
        DateFormat dateFormat = new SimpleDateFormat("dd-M-yyyy");
        String dateString = dateFormat.format(date);
-       HashData<Date, String> data = new HashData<Date, String>();
-       data.put(dateString, "1");
-       historyData.put(key, data);
+       boolean isKeyPresent = historyData.contains(key);
+       if(!isKeyPresent)
+       {
+           historyData.add(key);
+           historyData.add(dateString);
+           historyData.add("1");
+
+       }
+       else
+       {
+
+           if(data.get(0).equals(dateString))
+           {
+               int temp = Integer.parseInt(data.get(1));
+               temp++;
+               data.add(dateString);
+               data.add(String.valueOf(temp));
+               historyData.replace(key, data);
+           }
+           else
+           {
+               data.add(dateString);
+               data.add("1");
+               historyData.put(key, data);
+           }
+       }
    }
-    public static void printHistory(HashMap<String, HashData> historyData)
+    public static void printHistory(ArrayList<String> historyData)
     {
-        System.out.println("Word      Date      Times");
-        for(int i= 0;i< historyData.size();i++)
+        final Object[][] table = new String[3][];
+        System.out.println("     Word             Date                Times");
+        int i=0;
+        for(String entry : historyData)
         {
-            System.out.println(historyData.get(i));
+            String key = entry.getKey();
+            ArrayList<String> value = entry.getValue();
+            String date = value.get(0);
+            String times = value.get(1);
+            table[i] = new String[]{key, date, times};
+            i++;
+        }
+        for(final Object[]row : table)
+        {
+            System.out.format("%15s%15s%15s\n", row);
         }
     }
 }
