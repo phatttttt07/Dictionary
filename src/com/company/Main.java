@@ -353,16 +353,15 @@ public class Main {
        NodeList keyValueNodes = document.getElementsByTagName("log");
        for(int i=0;i<keyValueNodes.getLength();i++) {
            Node keyValueNode = keyValueNodes.item(i);
+           HashData<Date, String> value = new HashData<Date, String>();
            if(keyValueNode.getNodeType() == Node.ELEMENT_NODE)
            {
                Element keyValueElemet = (Element) keyValueNode;
                String key = keyValueElemet.getElementsByTagName("key").item(0).getTextContent();
                String date = keyValueElemet.getElementsByTagName("date").item(0).getTextContent();
                String times = keyValueElemet.getElementsByTagName("times").item(0).getTextContent();
-               HashData<Date, String> value = new HashData<Date, String>();
                value.put(date, times);
                historyData.put(key, value);
-               System.out.println(historyData.get(0));
            }
        }
    }
