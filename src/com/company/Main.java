@@ -441,9 +441,11 @@ public class Main {
        historyData.put(dataKey, 1);
    }
     public static void printHistory(HashMap<HashData, Integer> historyData, String dayBegin, String dayEnd) throws ParseException {
-        final String[][] table = new String[3][];
-        System.out.print("      Key          " + dayBegin + "     " + dayEnd);
-        int i=0;
+        ArrayList<String> header = new ArrayList<>();
+        header.add("KEY");
+        header.add(dayBegin);
+        header.add(dayEnd);
+        ArrayList<ArrayList<String>> table =new ArrayList<>();
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
         Date beDate = formatter.parse(dayBegin);
         Date enDate = formatter.parse(dayEnd);
@@ -455,15 +457,43 @@ public class Main {
             Date date = formatter.parse(data.getDate());
             if(date.after(beDate)&&date.before(enDate))
             {
-                table[i] = new String[]{data.getWord(), String.valueOf(set.getValue())};
-                i++;
+                ArrayList<String> row = new ArrayList<>();
+                row.add(data.getWord());
+                row.add(String.valueOf(set.getValue()));
+                table.add(row);
             }
         }
-        for(final Object[]row : table)
+        System.out.println("\n");
+        for(int i=0;i<table.size();i++)
         {
-            System.out.format("\n%5s%20s", row);
+            count = Integer.parseInt(table.get(i).get(1));
+            for(int j = i+1;j<table.size()-1;j++)
+            {
+
+                if(table.get(i).get(0).equals(table.get(j).get(0)))
+                {
+                    String key = table.get(i).get(0);
+                    count += Integer.parseInt(table.get(j).get(1));
+                    table.remove(j);
+                    ArrayList<String> temp = new ArrayList<>();
+                    temp.add(key);
+                    temp.add(String.valueOf(count));
+                    table.set(i, temp);
+                }
+            }
         }
+        for (String s : header) {
+            System.out.print(s + "\t");
+        }
+        System.out.println("\n");
+        for(ArrayList<String> set : table)
+        {
+            for(String subSet :set)
+            {
+                System.out.print(subSet + "\t\t\t\t" );
+            }
+            System.out.println("\n");
+        }
+        PressAnyKeytoContinue();
     }
-
-
 }
