@@ -213,7 +213,12 @@ public class Main {
                 }
                 case(3):
                 {
-                    printHistory((HashMap<String, HashData>) historyData);
+                    Scanner in = new Scanner(System.in);
+                    System.out.print("Nhap ngay bat dau:");
+                    String beginDay = in.nextLine();
+                    System.out.print("Nhap ngay ket thuc:");
+                    String endDay = in.nextLine();
+                 //   printHistory((HashMap<String, HashData>) historyData);
                     break;
                 }
                 case(4):
@@ -353,7 +358,7 @@ public class Main {
        NodeList keyValueNodes = document.getElementsByTagName("log");
        for(int i=0;i<keyValueNodes.getLength();i++) {
            Node keyValueNode = keyValueNodes.item(i);
-           HashData<Date, String> value = new HashData<Date, String>();
+           HashData<String, String> value = new HashData<String, String>();
            if(keyValueNode.getNodeType() == Node.ELEMENT_NODE)
            {
                Element keyValueElemet = (Element) keyValueNode;
@@ -364,6 +369,7 @@ public class Main {
                historyData.put(key, value);
            }
        }
+
    }
    public static void writeHistoryLog(HashMap<String, HashData> historyData)
    {
@@ -406,12 +412,14 @@ public class Main {
        data.put(dateString, "1");
        historyData.put(key, data);
    }
-    public static void printHistory(HashMap<String, HashData> historyData)
+    public static void printHistory(HashMap<String, HashData> historyData, String dayBegin, String dayEnd)
     {
-        System.out.println("Word      Date      Times");
-        for(int i= 0;i< historyData.size();i++)
+        final Object[][] table = new String[3][];
+        int i=0;
+        for(Map.Entry<String, HashData> set :historyData.entrySet())
         {
-            System.out.println(historyData.get(i));
+            String key = set.getKey();
+            String date =
         }
     }
 }
