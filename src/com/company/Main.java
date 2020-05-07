@@ -35,7 +35,7 @@ public class Main {
         // write your code here
         readHistoryLog((HashMap<HashData, Integer>) historyData);
         while (true) {
-            System.out.println("DICTIONARY");
+            System.out.println("\nDICTIONARY");
             System.out.println("1.Eng-Vie");
             System.out.println("2.Vie-Eng");
             System.out.println("3.History");
@@ -441,8 +441,8 @@ public class Main {
        historyData.put(dataKey, 1);
    }
     public static void printHistory(HashMap<HashData, Integer> historyData, String dayBegin, String dayEnd) throws ParseException {
-        final Object[][] table = new String[2][];
-        System.out.print("Key          " + dayBegin + "     " + dayEnd);
+        final String[][] table = new String[3][];
+        System.out.print("      Key          " + dayBegin + "     " + dayEnd);
         int i=0;
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
         Date beDate = formatter.parse(dayBegin);
@@ -461,20 +461,9 @@ public class Main {
         }
         for(final Object[]row : table)
         {
-            System.out.format("%10s%10s\n", row);
+            System.out.format("\n%5s%20s", row);
         }
     }
-   /* public static void replaceData(HashMap<HashData, Integer> historyData, HashData key)
-    {
-        for(Map.Entry<HashData, Integer> set:historyData.entrySet())
-        {
-            if(set.getKey().getWord().equals(key.getWord()) && set.getKey().getDate().equals(key.getDate()))
-            {
-                int k = set.getValue()+1;
 
-                return;
-            }
-        }
-    }*/
 
 }
