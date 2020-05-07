@@ -3,25 +3,19 @@ package com.company;
 import java.util.Date;
 
 public class HashData<K1, K2> {
-    private String k1; //date
-    private String k2; //times
+    private String k1; //word
+    private String k2; //date
 
     public void put(String a, String b)
     {
         this.k1 = a;
         this.k2 = b;
     }
-    public void increaseTimes()
-    {
-        int i = Integer.parseInt(this.k2);
-        i++;
-        this.k2 = String.valueOf(i);
-    }
-    public String getDate()
+    public String getWord()
     {
         return this.k1;
     }
-    public String getTimes()
+    public String getDate()
     {
         return this.k2;
     }

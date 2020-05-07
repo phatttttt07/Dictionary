@@ -16,6 +16,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import com.company.HashData.*;
@@ -24,15 +25,15 @@ import static java.util.Arrays.asList;
 public class Main {
     public static Map<String, String> AVdata = new HashMap<String, String>();
     public static Map<String, String> VAdata = new HashMap<String, String>();
-    public static Map<String, HashData> historyData = new HashMap<String, HashData>();
+    public static Map<HashData, Integer> historyData = new HashMap<HashData, Integer>();
     public static String AnhViet = "Anh_Viet.xml";
     public static String VietAnh = "Viet_Anh.xml";
     public static String AnhVietNew = AnhViet;
     public static String VietAnhNew = VietAnh;
 
-    public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
+    public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException, ParseException {
         // write your code here
-
+        readHistoryLog((HashMap<HashData, Integer>) historyData);
         while (true) {
             System.out.println("DICTIONARY");
             System.out.println("1.Eng-Vie");
@@ -41,7 +42,6 @@ public class Main {
             System.out.println("4.Exit"+ "\n");
             System.out.println("Your Option:");
             Scanner scanner = new Scanner(System.in);
-            readHistoryLog((HashMap<String, HashData>) historyData);
             int result = scanner.nextInt();
             switch(result)
             {
@@ -70,12 +70,12 @@ public class Main {
                                 System.out.println("Word to search:");
                                 Scanner scanner2 = new Scanner(System.in);
                                 String keyWord = scanner2.nextLine();
+                                writeHistoryData(keyWord, (HashMap<HashData, Integer>) historyData);
                                 System.out.println(findWord(keyWord.toLowerCase(), (HashMap<String, String>) AVdata));
                                 System.out.println("Press s to save this word to favorite or any other key to continue");
                                 Scanner save = new Scanner(System.in);
                                 String event = save.nextLine();
                                 saved(event, keyWord);
-                                writeHistoryData(keyWord, (HashMap<String, HashData>) historyData);
                                 break;
                             }
                             case(2):
@@ -128,7 +128,7 @@ public class Main {
                             }
                             case(5):
                             {
-                                writeHistoryLog((HashMap<String, HashData>) historyData);
+                                writeHistoryLog((HashMap<HashData, Integer>) historyData);
                                 System.exit(0);
                             }
                             default:{
@@ -163,11 +163,11 @@ public class Main {
                                 Scanner scanner2 = new Scanner(System.in);
                                 String keyWord = scanner2.nextLine();
                                 System.out.println(findWord(keyWord.toLowerCase(), (HashMap<String, String>) VAdata));
+                                writeHistoryData(keyWord, (HashMap<HashData, Integer>) historyData);
                                 System.out.println("Press s to save this word to favorite or any other key to continue");
                                 Scanner save = new Scanner(System.in);
                                 String event = save.nextLine();
                                 saved(event, keyWord);
-                                writeHistoryData(keyWord, (HashMap<String, HashData>) historyData);
                                 break;
                             }
                             case(2):
@@ -191,6 +191,24 @@ public class Main {
                             }
                             case(3):
                             {
+                                System.out.println("DELETE WORD");
+                                Scanner scanner2 = new Scanner(System.in);
+                                System.out.println("Enter Word to delete:");
+                                String key = scanner2.nextLine();
+                                System.out.println("Are you sure to delete " + key + " ? [y/n]: ");
+                                String yn = scanner2.nextLine();
+                                yn.toLowerCase();
+                                if(yn.equals("y"))
+                                {
+                                    if(delWord(key, (HashMap<String, String>) VAdata))
+                                    {
+                                        System.out.println("Delete Word Successful");
+                                    }
+                                    else
+                                    {
+                                        System.out.println("Delete failed, Please try again");
+                                    }
+                                }
                                 PressAnyKeytoContinue();
                                 break;
                             }
@@ -202,7 +220,7 @@ public class Main {
                             }
                             case(5):
                             {
-                                writeHistoryLog((HashMap<String, HashData>) historyData);
+                                writeHistoryLog((HashMap<HashData, Integer>) historyData);
                                 System.exit(0);
                             }
                             default:{
@@ -210,6 +228,7 @@ public class Main {
                             }
                         }
                     }
+                    break;
                 }
                 case(3):
                 {
@@ -218,12 +237,12 @@ public class Main {
                     String beginDay = in.nextLine();
                     System.out.print("Nhap ngay ket thuc:");
                     String endDay = in.nextLine();
-                 //   printHistory((HashMap<String, HashData>) historyData);
+                    printHistory((HashMap<HashData, Integer>) historyData, beginDay, endDay);
                     break;
                 }
                 case(4):
                 {
-                    writeHistoryLog((HashMap<String, HashData>) historyData);
+                    writeHistoryLog((HashMap<HashData, Integer>) historyData);
                     System.exit(0);
                 }
                 default:{
@@ -349,29 +368,29 @@ public class Main {
            }
            return true;
    }
-   public static void readHistoryLog(HashMap<String, HashData> historyData) throws ParserConfigurationException, IOException, SAXException {
+   public static void readHistoryLog(HashMap<HashData, Integer> historyData) throws ParserConfigurationException, IOException, SAXException {
        File file = new File("history.xml");
-       DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-       DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-       Document document = documentBuilder.parse(file);
-       document.getDocumentElement().normalize();
-       NodeList keyValueNodes = document.getElementsByTagName("log");
-       for(int i=0;i<keyValueNodes.getLength();i++) {
-           Node keyValueNode = keyValueNodes.item(i);
-           HashData<String, String> value = new HashData<String, String>();
-           if(keyValueNode.getNodeType() == Node.ELEMENT_NODE)
-           {
-               Element keyValueElemet = (Element) keyValueNode;
-               String key = keyValueElemet.getElementsByTagName("key").item(0).getTextContent();
-               String date = keyValueElemet.getElementsByTagName("date").item(0).getTextContent();
-               String times = keyValueElemet.getElementsByTagName("times").item(0).getTextContent();
-               value.put(date, times);
-               historyData.put(key, value);
+       if(file.exists() && file.length()!=0) {
+           DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+           DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+           Document document = documentBuilder.parse(file);
+           document.getDocumentElement().normalize();
+           NodeList keyValueNodes = document.getElementsByTagName("log");
+           for (int i = 0; i < keyValueNodes.getLength(); i++) {
+               Node keyValueNode = keyValueNodes.item(i);
+               HashData<String, String> key = new HashData<String, String>();
+               if (keyValueNode.getNodeType() == Node.ELEMENT_NODE) {
+                   Element keyValueElemet = (Element) keyValueNode;
+                   String word = keyValueElemet.getElementsByTagName("key").item(0).getTextContent();
+                   String date = keyValueElemet.getElementsByTagName("date").item(0).getTextContent();
+                   String times = keyValueElemet.getElementsByTagName("times").item(0).getTextContent();
+                   key.put(word, date);
+                   historyData.put(key, Integer.parseInt(times));
+               }
            }
        }
-
    }
-   public static void writeHistoryLog(HashMap<String, HashData> historyData)
+   public static void writeHistoryLog(HashMap<HashData, Integer> historyData)
    {
        try {
 
@@ -380,21 +399,21 @@ public class Main {
            Element root = dom.createElement("root");
 
            dom.appendChild(root);
-           for (Map.Entry<String, HashData> keyValue : historyData.entrySet())
+           for (Map.Entry<HashData, Integer> keyValue : historyData.entrySet())
            {
+               HashData<String, String> value = new HashData<String, String>();
+               value = keyValue.getKey();
                Element log = dom.createElement("log");
                Element key = dom.createElement("key");
-               key.setTextContent((String) keyValue.getKey());
                Element date = dom.createElement("date");
                Element times = dom.createElement("times");
-               HashData<String, String> value = new HashData<String, String>();
-               value = keyValue.getValue();
+               key.setTextContent(value.getWord());
                date.setTextContent(value.getDate());
-               times.setTextContent(value.getTimes());
+               times.setTextContent(String.valueOf(keyValue.getValue()));
                log.appendChild(key);
                log.appendChild(date);
                log.appendChild(times);
-               root.appendChild(log);
+                root.appendChild(log);
            }
 
            Transformer tr = TransformerFactory.newInstance().newTransformer();
@@ -403,23 +422,59 @@ public class Main {
        } catch (Exception ex) {
        }
    }
-   public static void writeHistoryData(String key, HashMap<String, HashData> historyData)
+   public static void writeHistoryData(String key, HashMap<HashData, Integer> historyData)
    {
        Date date = Calendar.getInstance().getTime();
-       DateFormat dateFormat = new SimpleDateFormat("dd-M-yyyy");
+       DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
        String dateString = dateFormat.format(date);
-       HashData<Date, String> data = new HashData<Date, String>();
-       data.put(dateString, "1");
-       historyData.put(key, data);
+       HashData<String, String> dataKey = new HashData<>();
+       dataKey.put(key, dateString);
+       for(Map.Entry<HashData, Integer> set:historyData.entrySet())
+       {
+           if(set.getKey().getWord().equals(key) && set.getKey().getDate().equals(dateString))
+           {
+               int k = set.getValue()+1;
+               set.setValue(k);
+               return;
+           }
+       }
+       historyData.put(dataKey, 1);
    }
-    public static void printHistory(HashMap<String, HashData> historyData, String dayBegin, String dayEnd)
-    {
-        final Object[][] table = new String[3][];
+    public static void printHistory(HashMap<HashData, Integer> historyData, String dayBegin, String dayEnd) throws ParseException {
+        final Object[][] table = new String[2][];
+        System.out.print("Key          " + dayBegin + "     " + dayEnd);
         int i=0;
-        for(Map.Entry<String, HashData> set :historyData.entrySet())
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        Date beDate = formatter.parse(dayBegin);
+        Date enDate = formatter.parse(dayEnd);
+        int count;
+        for(Map.Entry<HashData, Integer> set :historyData.entrySet())
         {
-            String key = set.getKey();
-            String date =
+            HashData<String, String> data = new HashData<>();
+            data = set.getKey();
+            Date date = formatter.parse(data.getDate());
+            if(date.after(beDate)&&date.before(enDate))
+            {
+                table[i] = new String[]{data.getWord(), String.valueOf(set.getValue())};
+                i++;
+            }
+        }
+        for(final Object[]row : table)
+        {
+            System.out.format("%10s%10s\n", row);
         }
     }
+   /* public static void replaceData(HashMap<HashData, Integer> historyData, HashData key)
+    {
+        for(Map.Entry<HashData, Integer> set:historyData.entrySet())
+        {
+            if(set.getKey().getWord().equals(key.getWord()) && set.getKey().getDate().equals(key.getDate()))
+            {
+                int k = set.getValue()+1;
+
+                return;
+            }
+        }
+    }*/
+
 }
